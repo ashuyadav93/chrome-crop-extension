@@ -25,11 +25,11 @@ function cropData(str, coords, callback) {
 	img.src = str;
 }
  
-function capture(coords) {
+function capture(coords, domElement) {
 	chrome.tabs.captureVisibleTab(null, {format: "png"}, function(data) {
 		cropData(data, coords, function(data) {
 			console.log("Done");
-			saveFile(data.dataUri);
+			saveFile(data.dataUri, domElement);
 		});
 	});
 }
@@ -44,7 +44,7 @@ chrome.extension.onMessage.addListener(gotMessage);
  
 function gotMessage(request, sender, sendResponse) {
 	if (request.type == "coords")
-		capture(request.coords);
+		capture(request.coords, request.domElement);
  
 	sendResponse({}); // snub them.
 }
@@ -55,7 +55,7 @@ function sendMessage(msg, tab) {
 	chrome.tabs.sendMessage(tab.id, msg, function(response) {});
 };
 
-function saveFile(dataURI) {
+function saveFile(dataURI, domElement) {
 
 	// convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs
@@ -88,6 +88,7 @@ function saveFile(dataURI) {
         name = '';
     }
     name = 'screencapture' + name + '.png';
+    namehtml = 'domelement.html';
 
     function onwriteend() {
         // open the file that now contains the blob
@@ -107,4 +108,11 @@ function saveFile(dataURI) {
             }, errorHandler);
         }, errorHandler);
     }, errorHandler);
+
+   var blobDom = new Blob([domElement], {type: "text/plain"});
+   var url = window.URL.createObjectURL(blobDom);
+   var a = document.createElement("a");
+   a.href = url;
+   a.download = namehtml;
+   a.click();
 }

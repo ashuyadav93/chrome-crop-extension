@@ -19,10 +19,10 @@ function startScreenshot() { console.log('start screenshot');
 	document.addEventListener('keydown', keyDown, false);
 }
  
-function endScreenshot(coords) {
+function endScreenshot(coords, domElement) {
 	document.removeEventListener('mousedown', mouseDown, false);
 	
-	sendMessage({type: 'coords', coords: coords});
+	sendMessage({type: 'coords', coords: coords, domElement:domElement});
 }
  
 function sendMessage(msg) {
@@ -107,7 +107,7 @@ function mouseUp(e) {
 			y: startY
 		};
 		gCoords = coords;
-		endScreenshot(coords);
+		endScreenshot(coords, e.target.outerHTML);
 	}, 50);
 	
 	return false;
